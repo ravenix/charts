@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "openvpn.fullname" . }}
+  labels:
+    {{- include "openvpn.labels" . | nindent 4 }}
+data:
+  server.ovpn: |-
+    port 1194
+    proto udp
+    dev tun
+    ca /secret/{{ .Values.openvpn.serverSecret.caKey }}
+    cert /secret/{{ .Values.openvpn.serverSecret.certKey }}
+    key /secret/{{ .Values.openvpn.serverSecret.pkKey }}
+    dh /state/dh2048.pem
+    topology subnet
+    server {{ .Values.openvpn.networkAddr }} {{ .Values.openvpn.subnetMask }}
+    push "redirect-gateway def1"
+    push "dhcp-option DNS 8.8.8.8"
+    push "dhcp-option DNS 8.8.4.4"
+    keepalive 10 120
+    tls-auth /state/ta.key 0
+    tls-version-min 1.2
+    tls-cipher TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384
+    auth SHA512
+    cipher AES-256-CBC
+    comp-lzo
+    persist-key
+    persist-tun
+    verb 6
+    user openvpn
+    group openvpn

@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "openvpn.fullname" . }}
+  labels:
+    {{- include "openvpn.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "openvpn.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "openvpn.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      hostNetwork: true
+      initContainers:
+        - name: init-create-dh
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: state
+            mountPath: /state
+          command: ["sh", "-c", "[[ -f /state/dh2048.pem ]] || openssl dhparam -out /state/dh2048.pem 2048"]
+        - name: init-create-ta
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: state
+            mountPath: /state
+          command: ["sh", "-c", "[[ -f /state/ta.key ]] || openvpn --genkey --secret /state/ta.key"]
+      containers:
+        - name: openvpn
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: ovpn
+              containerPort: 1194
+              protocol: UDP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: dev-net
+            mountPath: /dev/net
+          - name: secret
+            mountPath: /secret
+          - name: state
+            mountPath: /state
+          args: ["--config", "/config/server.ovpn"]
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "openvpn.fullname" . }}
+      - name: dev-net
+        hostPath: /dev/net
+      - name: secret
+        secret:
+          secretName: {{ required "You need to specify a server secret name" .Values.openvpn.serverSecret.name | quote }}
+      - name: state
+        persistentVolumeClaim:
+          claimName:  {{ include "openvpn.fullname" . }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+

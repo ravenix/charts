@@ -1,0 +1,40 @@
+image:
+  repository: quay.io/ravenix/openvpn
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+
+securityContext:
+  capabilities:
+    drop:
+    - NET_ADMIN
+  readOnlyRootFilesystem: true
+
+persistence:
+  storageClass:
+  accessMode: ReadWriteOnce
+  size: 128Mi
+
+service:
+  type: ClusterIP
+  port: 80
+
+openvpn:
+  networkAddr: 10.0.8.0
+  subnetMask: 255.255.255.0
+  serverSecret:
+    name:
+    caKey: ca.crt
+    certKey: tls.crt
+    pkKey: tls.key
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
