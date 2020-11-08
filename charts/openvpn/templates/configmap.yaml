@@ -9,15 +9,18 @@ data:
     port 1194
     proto udp
     dev tun
-    ca /secret/{{ .Values.openvpn.serverSecret.caKey }}
-    cert /secret/{{ .Values.openvpn.serverSecret.certKey }}
-    key /secret/{{ .Values.openvpn.serverSecret.pkKey }}
+    ca /secret/ca.crt
+    cert /secret/tls.crt
+    key /secret/tls.key
     dh /state/dh2048.pem
     topology subnet
     server {{ .Values.openvpn.networkAddr }} {{ .Values.openvpn.subnetMask }}
     push "redirect-gateway def1"
     push "dhcp-option DNS 8.8.8.8"
     push "dhcp-option DNS 8.8.4.4"
+    {{- range .Values.openvpn.pushOptions }}
+    push {{ . | quote }}
+    {{- end }}
     keepalive 10 120
     tls-auth /state/ta.key 0
     tls-version-min 1.2
@@ -30,3 +33,4 @@ data:
     verb 6
     user openvpn
     group openvpn
+

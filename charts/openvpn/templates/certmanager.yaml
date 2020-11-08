@@ -1,0 +1,63 @@
+{{- if not .Values.openvpn.certificate.issuer }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "openvpn.fullname" . }}-selfsigned
+  labels:
+    {{- include "openvpn.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "openvpn.fullname" . }}-ca
+  labels:
+    {{- include "openvpn.labels" . | nindent 4 }}
+spec:
+  issuerRef:
+    kind: Issuer
+    name: {{ include "openvpn.fullname" . }}-selfsigned
+  secretName: {{ include "openvpn.fullname" . }}-ca
+  isCA: true
+  duration: 86400h
+  renewBefore: 8640h
+  privateKey:
+    rotationPolicy: Never
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "openvpn.fullname" . }}-ca
+  labels:
+    {{- include "openvpn.labels" . | nindent 4 }}
+spec:
+  ca:
+    secretName: {{ include "openvpn.fullname" . }}-ca
+{{- end }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "openvpn.fullname" . }}-server
+  labels:
+    {{- include "openvpn.labels" . | nindent 4 }}
+spec:
+  issuerRef:
+    kind: Issuer
+    name: {{ .Values.openvpn.certificate.issuer | default (printf "%s-ca" (include "openvpn.fullname" .)) | quote }}
+  secretName: {{ include "openvpn.fullname" . }}-server
+  {{- with .Values.openvpn.certificate }}
+  commonName: {{ .commonName | default (include "openvpn.fullname" $) | quote }}
+  {{- if len .dnsNames }}
+  dnsNames:
+  {{- range .dnsNames }}
+  - {{ . | quote }}
+  {{- end }}
+  {{- end }}
+  usages:
+  - server auth
+  {{- end }}
+  privateKey:
+    rotationPolicy: Always
+

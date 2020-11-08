@@ -28,11 +28,11 @@ service:
 openvpn:
   networkAddr: 10.0.8.0
   subnetMask: 255.255.255.0
-  serverSecret:
-    name:
-    caKey: ca.crt
-    certKey: tls.crt
-    pkKey: tls.key
+  pushOptions: []
+  certificate:
+    issuer: ~
+    commonName: ~
+    dnsNames: []
 
 resources: {}
 nodeSelector: {}

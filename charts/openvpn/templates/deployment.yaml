@@ -80,7 +80,7 @@ spec:
           type: Directory
       - name: secret
         secret:
-          secretName: {{ required "You need to specify a server secret name" .Values.openvpn.serverSecret.name | quote }}
+          secretName: {{ include "openvpn.fullname" . }}-server
       - name: state
         persistentVolumeClaim:
           claimName:  {{ include "openvpn.fullname" . }}
