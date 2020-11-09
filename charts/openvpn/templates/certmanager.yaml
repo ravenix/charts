@@ -19,6 +19,7 @@ spec:
     kind: Issuer
     name: {{ include "openvpn.fullname" . }}-selfsigned
   secretName: {{ include "openvpn.fullname" . }}-ca
+  commonName: {{ include "openvpn.fullname" . }}-ca
   isCA: true
   duration: 86400h
   renewBefore: 8640h

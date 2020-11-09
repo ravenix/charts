@@ -36,7 +36,7 @@ spec:
           volumeMounts:
           - name: state
             mountPath: /state
-          command: ["sh", "-c", "[[ -f /state/dh2048.pem ]] || openssl dhparam -out /state/dh2048.pem 2048"]
+          command: ["sh", "-c", "[[ -f /state/dh2048.pem ]] || openssl dhparam -out /state/dh2048.pem 2048 && chmod 0600 /state/dh2048.pem"]
         - name: init-create-ta
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -47,7 +47,7 @@ spec:
           volumeMounts:
           - name: state
             mountPath: /state
-          command: ["sh", "-c", "[[ -f /state/ta.key ]] || openvpn --genkey --secret /state/ta.key"]
+          command: ["sh", "-c", "[[ -f /state/ta.key ]] || openvpn --genkey --secret /state/ta.key && chmod 0600 /state/ta.key"]
       containers:
         - name: openvpn
           securityContext:
@@ -69,6 +69,8 @@ spec:
             mountPath: /secret
           - name: state
             mountPath: /state
+          - name: tmp
+            mountPath: /tmp
           args: ["--config", "/config/server.ovpn"]
       volumes:
       - name: config
@@ -84,6 +86,8 @@ spec:
       - name: state
         persistentVolumeClaim:
           claimName:  {{ include "openvpn.fullname" . }}
+      - name: tmp
+        emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
