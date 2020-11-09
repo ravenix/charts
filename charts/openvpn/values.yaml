@@ -12,7 +12,7 @@ podSecurityContext: {}
 
 securityContext:
   capabilities:
-    drop:
+    add:
     - NET_ADMIN
   readOnlyRootFilesystem: true
 
