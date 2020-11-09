@@ -24,7 +24,6 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      hostNetwork: true
       initContainers:
         - name: init-create-dh
           securityContext:
