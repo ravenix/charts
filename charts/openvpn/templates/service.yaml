@@ -9,7 +9,8 @@ spec:
   ports:
     - port: {{ .Values.service.port }}
       targetPort: ovpn
-      protocol: UDP
+      protocol: {{ upper .Values.service.protocol }}
       name: ovpn
   selector:
     {{- include "openvpn.selectorLabels" . | nindent 4 }}
+

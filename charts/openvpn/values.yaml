@@ -23,7 +23,8 @@ persistence:
 
 service:
   type: ClusterIP
-  port: 80
+  port: 1194
+  protocol: UDP
 
 openvpn:
   networkAddr: 10.0.8.0

@@ -6,8 +6,8 @@ metadata:
     {{- include "openvpn.labels" . | nindent 4 }}
 data:
   server.ovpn: |-
-    port 1194
-    proto udp
+    port {{ .Values.service.port }}
+    proto {{ lower .Values.service.protocol }}
     dev tun
     ca /secret/ca.crt
     cert /secret/tls.crt
