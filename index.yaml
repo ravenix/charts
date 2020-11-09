@@ -3,6 +3,16 @@ entries:
   openvpn:
   - apiVersion: v2
     appVersion: 2.4.9-r0
+    created: "2020-11-09T14:48:40.19016619Z"
+    description: A Helm chart deploying OpenVPN on Kubernetes
+    digest: 061d51d2a5f40ff476995e53da96c420dd8e0daaeb379829f5c9df28a662ff0c
+    name: openvpn
+    type: application
+    urls:
+    - https://github.com/ravenix/charts/releases/download/openvpn-0.0.2/openvpn-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
+    appVersion: 2.4.9-r0
     created: "2020-11-08T22:34:30.431492235Z"
     description: A Helm chart deploying OpenVPN on Kubernetes
     digest: 562e25fbd0defa10682b27c76f7f380c0b8010e790eaead5c02c8a25d88ca03f
